@@ -152,7 +152,7 @@
   .mflag{font-size:1.05rem;flex-shrink:0;}
   .score-box{
     text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;
-    color:var(--accent);letter-spacing:1px;white-space:nowrap;
+    color:var(--accent);letter-spacing:1px;white-space:nowrap;line-height:1.1;
   }
   .score-box.pending{color:var(--muted);font-family:'Inter',sans-serif;font-size:.78rem;font-weight:700;}
 
@@ -237,6 +237,11 @@
     font-size:.65rem;
   }
   .bf-row.tbd-row .cname{color:var(--muted);font-style:italic;}
+  .bf-row.bf-winner{background:rgba(34,197,94,.08);}
+  .bf-row.bf-winner .cname{color:var(--accent);font-weight:800;}
+  .bf-row.bf-loser{opacity:.45;}
+  .bf-row.bf-loser .cname{text-decoration:line-through;color:var(--muted);}
+  .bf-row.bf-confirmed .cname{color:var(--accent);font-weight:800;}
   .bf-meta{
     font-size:.46rem;color:var(--muted);text-align:center;padding:3px 4px 0;letter-spacing:.2px;line-height:1.25;
   }
@@ -593,7 +598,7 @@ const FIXTURES = {
     ]},
     {date:"Lun 29/06", matches:[
       {t:"14:00", h:"Brasil",         a:"Japón",              st:"F", hs:2, as:1},
-      {t:"17:30", h:"Alemania",       a:"Paraguay",           st:"F", hs:1, as:1, pen:"Paraguay avanza (pen.)"},
+      {t:"17:30", h:"Alemania",       a:"Paraguay",           st:"F", hs:1, as:1, pens:[4,3]},
       {t:"22:00", h:"Países Bajos",   a:"Marruecos",          st:"P"},
     ]},
     {date:"Mar 30/06", matches:[
@@ -622,12 +627,12 @@ const FIXTURES = {
 
   "8vos": [
     {date:"Sáb 04/07", matches:[
-      {t:"14:00", h:"A definir", a:"A definir", st:"P"},
-      {t:"18:00", h:"A definir", a:"A definir", st:"P"},
+      {t:"14:00", h:"Paraguay",   a:"A definir", st:"P"},
+      {t:"18:00", h:"Canadá",     a:"A definir", st:"P"},
     ]},
     {date:"Dom 05/07", matches:[
-      {t:"17:00", h:"A definir", a:"A definir", st:"P"},
-      {t:"21:00", h:"A definir", a:"A definir", st:"P"},
+      {t:"17:00", h:"Brasil",     a:"A definir", st:"P"},
+      {t:"21:00", h:"A definir",  a:"A definir", st:"P"},
     ]},
     {date:"Lun 06/07", matches:[
       {t:"16:00", h:"A definir", a:"A definir", st:"P"},
@@ -932,7 +937,8 @@ function renderFixtures(jornada){
       let statusHtml, scoreHtml;
       if(m.st==='F'){
         statusHtml=`<div class="match-status status-final">Final</div>`;
-        scoreHtml=`<div class="score-box">${m.hs} - ${m.as}</div>`;
+        const pensHtml = m.pens ? `<div style="font-size:.62rem;color:var(--muted);font-weight:600;margin-top:1px;">(${m.pens[0]} - ${m.pens[1]})</div>` : '';
+        scoreHtml=`<div class="score-box">${m.hs} - ${m.as}${pensHtml}</div>`;
       } else if(m.st==='L'){
         statusHtml=`<div class="match-status status-live"><span class="live-pulse"></span>EN VIVO</div>`;
         scoreHtml=`<div class="score-box">${m.hs} - ${m.as}</div>`;
@@ -947,13 +953,6 @@ function renderFixtures(jornada){
         <div class="team-side right"><span>${m.a}</span><span class="mflag">${FLAGS[m.a]||''}</span></div>
       `;
       wrap.appendChild(row);
-      // Nota de penales / clasificado (solo para eliminación directa)
-      if(m.pen){
-        const note=document.createElement('div');
-        note.style.cssText='font-size:.6rem;color:var(--accent);text-align:center;padding:2px 8px 6px;letter-spacing:.3px;';
-        note.textContent='🏆 ' + m.pen;
-        wrap.appendChild(note);
-      }
     });
   });
 }
@@ -972,9 +971,9 @@ function renderFixtures(jornada){
 // NED-MAR, POR-CRO, ESP-AUT, USA-BIH, BEL-SEN | BRA-JPN, CIV-NOR, MEX-ECU,
 // ENG-COD, ARG-CPV, AUS-EGY, SUI-DZA, COL-GHA)
 const BRACKET_LEFT = [
-  {a:"Alemania",       b:"Paraguay",           date:"Lun 29/06", venue:"Boston"},
+  {a:"Alemania",       b:"Paraguay",           date:"Lun 29/06", venue:"Boston",           winner:"Paraguay"},
   {a:"Francia",        b:"Suecia",             date:"Mar 30/06", venue:"Nueva York / N.J."},
-  {a:"Sudáfrica",      b:"Canadá",             date:"Dom 28/06", venue:"Los Ángeles"},
+  {a:"Sudáfrica",      b:"Canadá",             date:"Dom 28/06", venue:"Los Ángeles",       winner:"Canadá"},
   {a:"Países Bajos",   b:"Marruecos",          date:"Lun 29/06", venue:"Monterrey"},
   {a:"Portugal",       b:"Croacia",            date:"Jue 02/07", venue:"Toronto"},
   {a:"España",         b:"Austria",            date:"Jue 02/07", venue:"Los Ángeles"},
@@ -982,7 +981,7 @@ const BRACKET_LEFT = [
   {a:"Bélgica",        b:"Senegal",            date:"Mié 01/07", venue:"Seattle"},
 ];
 const BRACKET_RIGHT = [
-  {a:"Brasil",          b:"Japón",        date:"Lun 29/06", venue:"Houston"},
+  {a:"Brasil",          b:"Japón",        date:"Lun 29/06", venue:"Houston",          winner:"Brasil"},
   {a:"Costa de Marfil", b:"Noruega",      date:"Mar 30/06", venue:"Dallas"},
   {a:"México",          b:"Ecuador",      date:"Mar 30/06", venue:"Ciudad de México"},
   {a:"Inglaterra",      b:"Congo DR",     date:"Mié 01/07", venue:"Atlanta"},
@@ -1000,23 +999,40 @@ function tbdRowHTML(label){
   return `<div class="bf-row tbd-row"><span class="mflag">⚽</span><span class="cname">${label}</span></div>`;
 }
 
-// Tarjeta de 16avos: con equipos confirmados y fecha/sede
+// Tarjeta de 16avos: resalta ganador y tacha perdedor si ya se jugó
 function r16CardHTML(llave, col, row){
+  const claseA = llave.winner ? (llave.winner===llave.a ? 'bf-winner' : 'bf-loser') : '';
+  const claseB = llave.winner ? (llave.winner===llave.b ? 'bf-winner' : 'bf-loser') : '';
   return `
     <div class="bf-card" style="grid-column:${col};grid-row:${row} / span 2;">
-      <div class="bf-row">${teamFlagSpan(llave.a)}</div>
-      <div class="bf-row">${teamFlagSpan(llave.b)}</div>
+      <div class="bf-row ${claseA}">${teamFlagSpan(llave.a)}</div>
+      <div class="bf-row ${claseB}">${teamFlagSpan(llave.b)}</div>
       <div class="bf-meta">${llave.date} · ${llave.venue}</div>
     </div>
   `;
 }
 
-// Tarjeta TBD genérica para rondas siguientes (8vos, 4tos, semis)
+// Tarjeta TBD genérica para 4tos, semis (sin ganadores conocidos aún)
 function tbdCardHTML(col, rowStart, rowEnd){
   return `
     <div class="bf-card tbd" style="grid-column:${col};grid-row:${rowStart} / ${rowEnd};">
       ${tbdRowHTML('A definir')}
       ${tbdRowHTML('A definir')}
+    </div>
+  `;
+}
+
+// Tarjeta de 8vos: muestra ganadores ya clasificados, o "A definir" si no se sabe aún
+function octavoCardHTML(col, rowStart, rowEnd, llaveA, llaveB){
+  const equipoA = llaveA && llaveA.winner ? llaveA.winner : null;
+  const equipoB = llaveB && llaveB.winner ? llaveB.winner : null;
+  const rowA = equipoA ? `<div class="bf-row bf-confirmed">${teamFlagSpan(equipoA)}</div>` : tbdRowHTML('A definir');
+  const rowB = equipoB ? `<div class="bf-row bf-confirmed">${teamFlagSpan(equipoB)}</div>` : tbdRowHTML('A definir');
+  const tbdClass = (equipoA && equipoB) ? '' : 'tbd';
+  return `
+    <div class="bf-card ${tbdClass}" style="grid-column:${col};grid-row:${rowStart} / ${rowEnd};">
+      ${rowA}
+      ${rowB}
     </div>
   `;
 }
@@ -1046,8 +1062,8 @@ function renderCruces(){
   // --- 8vos: cada card ocupa 4 filas, centrada entre 2 llaves de 16avos ---
   for(let i=0;i<4;i++){
     const rowStart = i*4+1, rowEnd = rowStart+4;
-    html += tbdCardHTML(2, rowStart, rowEnd);
-    html += tbdCardHTML(8, rowStart, rowEnd);
+    html += octavoCardHTML(2, rowStart, rowEnd, BRACKET_LEFT[i*2], BRACKET_LEFT[i*2+1]);
+    html += octavoCardHTML(8, rowStart, rowEnd, BRACKET_RIGHT[i*2], BRACKET_RIGHT[i*2+1]);
   }
 
   // --- 4tos: cada card ocupa 8 filas ---
